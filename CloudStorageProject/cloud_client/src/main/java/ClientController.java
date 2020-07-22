@@ -39,11 +39,16 @@ public class ClientController {
                     }
                     else if(command.equals("download")){
                         out.writeUTF(command);
+                        command = sc.nextLine();
+                        out.writeUTF(command);
                         uploadFileFromServer();
                     }
                     else if(command.equals("send")){
                         out.writeUTF(command);
-                        sendFile(new File("./cloud_client/client/user-0/1.txt"));
+
+                        command = sc.nextLine();
+                        sendFile(new File("./cloud_client/client/"+nickname+"/"+command));
+                        //sendFile(new File("./cloud_client/client/user-0/1.txt"));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -72,18 +77,20 @@ public class ClientController {
     }
 
     public void sendFile(File file) throws IOException {
-        FileInputStream fileIn = new FileInputStream(file);
+        if(file.exists()) {
+            FileInputStream fileIn = new FileInputStream(file);
 
-        out.writeUTF(file.getName());
+            out.writeUTF(file.getName());
 
-        byte[] buf = new byte[Short.MAX_VALUE];
-        int bytesRead;
-        while( (bytesRead = fileIn.read(buf)) != -1 ) {
-            out.writeShort(bytesRead);
-            out.write(buf,0,bytesRead);
+            byte[] buf = new byte[Short.MAX_VALUE];
+            int bytesRead;
+            while ((bytesRead = fileIn.read(buf)) != -1) {
+                out.writeShort(bytesRead);
+                out.write(buf, 0, bytesRead);
+            }
+            out.writeShort(-1);
+            fileIn.close();
+            System.out.println("Файл отправлен");
         }
-        out.writeShort(-1);
-        fileIn.close();
-        System.out.println("Файл отправлен");;
     }
 }

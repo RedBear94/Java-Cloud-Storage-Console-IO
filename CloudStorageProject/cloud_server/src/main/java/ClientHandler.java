@@ -46,7 +46,11 @@ public class ClientHandler {
                                 }
                                 else if(command.equals("download")){
                                     System.out.println("Запрос на скачивание файла");
-                                    sendFile(new File("./cloud_server/server/user-0/2.txt"));
+
+                                    command = in.readUTF();
+                                    sendFile(new File("./cloud_server/server/"+nickname+"/"+command));
+
+                                    //sendFile(new File("./cloud_server/server/user-0/2.txt"));
                                 }
                                 else if(command.equals("send")){
                                     uploadFileFromClient();
@@ -78,19 +82,21 @@ public class ClientHandler {
     }
 
     public void sendFile(File file) throws IOException {
-        FileInputStream fileIn = new FileInputStream(file);
+        if(file.exists()) {
+            FileInputStream fileIn = new FileInputStream(file);
 
-        out.writeUTF(file.getName());
+            out.writeUTF(file.getName());
 
-        byte[] buf = new byte[Short.MAX_VALUE];
-        int bytesRead;
-        while( (bytesRead = fileIn.read(buf)) != -1 ) {
-            out.writeShort(bytesRead);
-            out.write(buf,0,bytesRead);
+            byte[] buf = new byte[Short.MAX_VALUE];
+            int bytesRead;
+            while( (bytesRead = fileIn.read(buf)) != -1 ) {
+                out.writeShort(bytesRead);
+                out.write(buf,0,bytesRead);
+            }
+            out.writeShort(-1);
+            fileIn.close();
+            System.out.println("Файл отправлен");
         }
-        out.writeShort(-1);
-        fileIn.close();
-        System.out.println("Файл отправлен");;
     }
 
     private void uploadFileFromClient() throws IOException {
